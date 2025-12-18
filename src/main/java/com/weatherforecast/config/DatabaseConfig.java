@@ -36,12 +36,12 @@ public class DatabaseConfig {
                }
                props.load(input);
 
-               // Load individual properties
-               HOST = props.getProperty("db.host", "localhost");
-               PORT = props.getProperty("db.port", "5432");
-               DB_NAME = props.getProperty("db.name", "weatherdb");
-               USERNAME = props.getProperty("db.username", "postgres");
-               PASSWORD = props.getProperty("db.password", "postgres");
+               // Load individual properties with Environment Variable fallback
+               HOST = getEnvOrProperty("DB_HOST", props, "db.host", "localhost");
+               PORT = getEnvOrProperty("DB_PORT", props, "db.port", "5432");
+               DB_NAME = getEnvOrProperty("DB_NAME", props, "db.name", "weatherdb");
+               USERNAME = getEnvOrProperty("DB_USERNAME", props, "db.username", "postgres");
+               PASSWORD = getEnvOrProperty("DB_PASSWORD", props, "db.password", "postgres");
 
                // Build URL from components
                URL = String.format("jdbc:postgresql://%s:%s/%s", HOST, PORT, DB_NAME);
@@ -58,6 +58,17 @@ public class DatabaseConfig {
                e.printStackTrace();
                setDefaults();
           }
+     }
+
+     /**
+      * Helper to get value from Env Var first, then Properties, then default
+      */
+     private static String getEnvOrProperty(String envKey, Properties props, String propKey, String defaultValue) {
+          String value = System.getenv(envKey);
+          if (value != null && !value.isEmpty()) {
+               return value;
+          }
+          return props.getProperty(propKey, defaultValue);
      }
 
      /**

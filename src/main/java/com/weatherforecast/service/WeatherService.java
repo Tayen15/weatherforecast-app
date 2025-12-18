@@ -38,11 +38,19 @@ public class WeatherService {
                     return;
                }
                props.load(input);
-               API_KEY = props.getProperty("weather.api.key");
-               API_URL = props.getProperty("weather.api.url");
+               API_KEY = getEnvOrProperty("WEATHER_API_KEY", props, "weather.api.key");
+               API_URL = getEnvOrProperty("WEATHER_API_URL", props, "weather.api.url");
           } catch (IOException e) {
                e.printStackTrace();
           }
+     }
+
+     private static String getEnvOrProperty(String envKey, Properties props, String propKey) {
+          String value = System.getenv(envKey);
+          if (value != null && !value.isEmpty()) {
+               return value;
+          }
+          return props.getProperty(propKey);
      }
 
      /**

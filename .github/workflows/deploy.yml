@@ -1,0 +1,82 @@
+name: Build and Deploy to Home Server
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=sha
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  deploy:
+    needs: build-and-push
+    # PENTING: Gunakan 'self-hosted' agar berjalan langsung di Home Server Anda
+    # Anda harus menginstall GitHub Runner di server terlebih dahulu
+    runs-on: self-hosted 
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create .env file
+        run: |
+          echo "DB_HOST=db.supabase.co" > .env
+          echo "DB_PORT=5432" >> .env
+          echo "DB_NAME=postgres" >> .env
+          echo "DB_USERNAME=postgres" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "WEATHER_API_KEY=${{ secrets.WEATHER_API_KEY }}" >> .env
+          echo "TUNNEL_TOKEN=${{ secrets.TUNNEL_TOKEN }}" >> .env
+
+      - name: Deploy with Docker Compose
+        run: |
+          # Pull image terbaru dari GHCR
+          docker-compose pull
+          
+          # Restart container dengan konfigurasi baru
+          docker-compose up -d --remove-orphans
+          
+          # Bersihkan image lama (opsional)
+          docker image prune -f

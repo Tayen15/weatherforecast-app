@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  # Aplikasi Utama
+  app:
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER:-username}/weatherforecast:latest
+    container_name: weather-app
+    restart: always
+    environment:
+      - DB_HOST=${DB_HOST:-db.supabase.co}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_NAME=${DB_NAME:-postgres}
+      - DB_USERNAME=${DB_USERNAME:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - WEATHER_API_KEY=${WEATHER_API_KEY}
+      - WEATHER_API_URL=https://api.openweathermap.org/data/2.5/weather
+    ports:
+      - "8080:8080"
+    networks:
+      - weather-net
+
+  # Cloudflare Tunnel (Untuk akses publik tanpa IP Publik)
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared-tunnel
+    restart: always
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
+    networks:
+      - weather-net
+
+networks:
+  weather-net:
+    driver: bridge
