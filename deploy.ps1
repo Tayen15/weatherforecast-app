@@ -13,11 +13,18 @@ if (-not (Test-Path "$PROJECT\pom.xml")) {
 # 2) Run mvn clean package
 Write-Host "Running mvn clean package..."
 Set-Location $PROJECT
-$mvn = "mvn"
-$proc = Start-Process -FilePath $mvn -ArgumentList "clean","package" -NoNewWindow -Wait -PassThru
 
-if ($proc.ExitCode -ne 0) {
-    Write-Error "Maven build gagal (exit code $($proc.ExitCode)). Periksa output di terminal."
+# Check if Maven is available
+if (-not (Get-Command "mvn" -ErrorAction SilentlyContinue)) {
+    Write-Error "Maven (mvn) tidak ditemukan. Pastikan Maven sudah terinstall dan ada di PATH."
+    Write-Host "Download Maven dari: https://maven.apache.org/download.cgi"
+    exit 2
+}
+
+# Run Maven build using direct invocation
+& mvn clean package
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Maven build gagal (exit code $LASTEXITCODE). Periksa output di terminal."
     exit 2
 }
 
