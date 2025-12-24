@@ -12,7 +12,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search History - WeatherNow</title>
+    <title>Riwayat Pencarian - WeatherNow</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -59,11 +59,27 @@
                 </div>
                 <div class="hidden md:flex items-center space-x-6">
                     <a href="${pageContext.request.contextPath}/" class="text-gray-700 hover:text-gray-900 font-medium transition">
-                        <i class="fas fa-home mr-1"></i> Home
+                        <i class="fas fa-home mr-1"></i> Beranda
                     </a>
-                    <a href="${pageContext.request.contextPath}/history" class="text-gray-900 font-semibold">
-                        <i class="fas fa-history mr-1"></i> History
+                    <a href="${pageContext.request.contextPath}/history" class="text-gray-700 hover:text-gray-900 font-medium transition">
+                        <i class="fas fa-history mr-1"></i> Riwayat
                     </a>
+                    <a href="${pageContext.request.contextPath}/favorites" class="text-gray-700 hover:text-gray-900 font-medium transition">
+                        <i class="fas fa-heart mr-1"></i> Favorit
+                    </a>
+                    <% if (session.getAttribute("loggedInUser") != null) { %>
+                        <span class="text-gray-600 text-sm">Selamat datang, <strong><%= session.getAttribute("loggedInUser") %></strong></span>
+                        <a href="${pageContext.request.contextPath}/logout" class="text-gray-700 hover:text-gray-900 font-medium transition">
+                            <i class="fas fa-sign-out-alt mr-1"></i> Keluar
+                        </a>
+                    <% } else { %>
+                        <a href="${pageContext.request.contextPath}/login" class="text-gray-700 hover:text-gray-900 font-medium transition">
+                            <i class="fas fa-sign-in-alt mr-1"></i> Masuk
+                        </a>
+                        <a href="${pageContext.request.contextPath}/register" class="text-gray-700 hover:text-gray-900 font-medium transition">
+                            <i class="fas fa-user-plus mr-1"></i> Daftar
+                        </a>
+                    <% } %>
                 </div>
             </div>
         </div>
@@ -75,9 +91,9 @@
         <div class="text-center mb-12">
             <div class="inline-flex items-center bg-white bg-opacity-20 backdrop-blur-md px-8 py-4 rounded-full mb-4">
                 <i class="fas fa-history text-white text-3xl mr-3"></i>
-                <h1 class="text-4xl font-bold text-white">Search History</h1>
+                <h1 class="text-4xl font-bold text-white">Riwayat Pencarian</h1>
             </div>
-            <p class="text-white text-xl text-opacity-90">Your recent weather searches</p>
+            <p class="text-white text-xl text-opacity-90">Pencarian cuaca terbaru Anda</p>
         </div>
 
         <% if (recentSearches != null && !recentSearches.isEmpty()) { %>
@@ -112,7 +128,7 @@
                                     <div class="text-4xl font-bold gradient-text">
                                         <%= String.format("%.1f", weather.getTemperature()) %>°C
                                     </div>
-                                    <div class="text-gray-500 text-xs mt-1">Temperature</div>
+                                    <div class="text-gray-500 text-xs mt-1">Temperatur</div>
                                 </div>
                                 
                                 <div class="text-center">
@@ -120,7 +136,7 @@
                                         <i class="fas fa-droplet mr-1"></i>
                                         <%= weather.getHumidity() %>%
                                     </div>
-                                    <div class="text-gray-500 text-xs mt-1">Humidity</div>
+                                    <div class="text-gray-500 text-xs mt-1">Kelembaban</div>
                                 </div>
                                 
                                 <div class="text-center">
@@ -128,7 +144,7 @@
                                         <i class="fas fa-wind mr-1"></i>
                                         <%= String.format("%.1f", weather.getWindSpeed()) %>
                                     </div>
-                                    <div class="text-gray-500 text-xs mt-1">Wind (m/s)</div>
+                                    <div class="text-gray-500 text-xs mt-1">Angin (m/s)</div>
                                 </div>
 
                                 <div class="text-center">
@@ -136,7 +152,7 @@
                                         <i class="fas fa-gauge-high mr-1"></i>
                                         <%= weather.getPressure() %>
                                     </div>
-                                    <div class="text-gray-500 text-xs mt-1">Pressure (hPa)</div>
+                                    <div class="text-gray-500 text-xs mt-1">Tekanan (hPa)</div>
                                 </div>
                             </div>
                         </div>
@@ -149,12 +165,12 @@
                 <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
                     <i class="fas fa-inbox text-5xl text-gray-700"></i>
                 </div>
-                <h3 class="text-3xl font-bold text-gray-800 mb-3">No Search History Yet</h3>
-                <p class="text-gray-600 mb-8 text-lg">Start searching for weather to see your history here</p>
+                <h3 class="text-3xl font-bold text-gray-800 mb-3">Belum Ada Riwayat Pencarian</h3>
+                <p class="text-gray-600 mb-8 text-lg">Mulai cari cuaca untuk melihat riwayat Anda di sini</p>
                 <a href="${pageContext.request.contextPath}/" 
                    class="inline-block px-8 py-4 bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-lg font-semibold text-lg hover:from-gray-900 hover:to-black transition transform hover:scale-105 shadow-lg">
                     <i class="fas fa-search mr-2"></i>
-                    Search Weather Now
+                    Cari Cuaca Sekarang
                 </a>
             </div>
         <% } %>
@@ -163,7 +179,7 @@
     <!-- Footer -->
     <footer class="mt-16 py-8 bg-black bg-opacity-20">
         <div class="max-w-7xl mx-auto px-4 text-center">
-            <p class="text-white text-opacity-70 text-sm">© 2025 WeatherNow. All rights reserved.</p>
+            <p class="text-white text-opacity-70 text-sm">© 2025 WeatherNow. Seluruh hak cipta dilindungi.</p>
         </div>
     </footer>
 </body>

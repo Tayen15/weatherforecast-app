@@ -1,7 +1,11 @@
 package com.weatherforecast.service;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.weatherforecast.model.DailyForecast;
+import com.weatherforecast.model.HourlyForecast;
 import com.weatherforecast.model.Weather;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -13,7 +17,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.Properties;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Service class to fetch weather data from OpenWeatherMap API
@@ -115,6 +120,11 @@ public class WeatherService {
                JsonObject sys = jsonObject.getAsJsonObject("sys");
                weather.setCountry(sys.get("country").getAsString());
 
+               // Parse coordinates
+               JsonObject coord = jsonObject.getAsJsonObject("coord");
+               weather.setLatitude(coord.get("lat").getAsDouble());
+               weather.setLongitude(coord.get("lon").getAsDouble());
+
                // Parse main weather data
                JsonObject main = jsonObject.getAsJsonObject("main");
                weather.setTemperature(main.get("temp").getAsDouble());
@@ -194,5 +204,166 @@ public class WeatherService {
       */
      public static String getIconUrl(String iconCode) {
           return "https://openweathermap.org/img/wn/" + iconCode + "@2x.png";
+     }
+
+     /**
+      * Fetch hourly forecast data by coordinates
+      * 
+      * @param lat Latitude
+      * @param lon Longitude
+      * @return List of hourly forecasts (next 8-12 hours)
+      * @throws IOException if API call fails
+      */
+     public List<HourlyForecast> getHourlyForecast(double lat, double lon) throws IOException {
+          if (API_KEY == null || API_KEY.equals("YOUR_API_KEY_HERE")) {
+               throw new IOException("API key not configured");
+          }
+
+          String forecastUrl = "https://api.openweathermap.org/data/2.5/forecast";
+          String url = String.format("%s?lat=%f&lon=%f&appid=%s&units=metric&cnt=8",
+                    forecastUrl, lat, lon, API_KEY);
+
+          try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+               HttpGet request = new HttpGet(url);
+               try (CloseableHttpResponse response = httpClient.execute(request)) {
+                    int statusCode = response.getStatusLine().getStatusCode();
+                    String responseBody = EntityUtils.toString(response.getEntity());
+
+                    if (statusCode == 200) {
+                         return parseHourlyForecast(responseBody);
+                    } else {
+                         throw new IOException("Forecast API error: " + statusCode);
+                    }
+               }
+          }
+     }
+
+     /**
+      * Parse hourly forecast response
+      */
+     private List<HourlyForecast> parseHourlyForecast(String jsonResponse) {
+          List<HourlyForecast> forecasts = new ArrayList<>();
+
+          try {
+               JsonObject jsonObject = JsonParser.parseString(jsonResponse).getAsJsonObject();
+               JsonArray list = jsonObject.getAsJsonArray("list");
+
+               for (JsonElement element : list) {
+                    JsonObject item = element.getAsJsonObject();
+
+                    HourlyForecast forecast = new HourlyForecast();
+
+                    // Parse timestamp
+                    long timestamp = item.get("dt").getAsLong() * 1000;
+                    forecast.setDateTime(new Date(timestamp));
+
+                    // Parse temperature and other data
+                    JsonObject main = item.getAsJsonObject("main");
+                    forecast.setTemperature(main.get("temp").getAsDouble());
+                    forecast.setHumidity(main.get("humidity").getAsInt());
+
+                    // Parse wind
+                    JsonObject wind = item.getAsJsonObject("wind");
+                    forecast.setWindSpeed(wind.get("speed").getAsDouble());
+
+                    // Parse weather description
+                    JsonObject weather = item.getAsJsonArray("weather").get(0).getAsJsonObject();
+                    forecast.setDescription(weather.get("description").getAsString());
+                    forecast.setIcon(weather.get("icon").getAsString());
+                    forecast.setCondition(weather.get("main").getAsString());
+
+                    forecasts.add(forecast);
+               }
+          } catch (Exception e) {
+               System.err.println("[ERROR] Failed to parse hourly forecast: " + e.getMessage());
+               e.printStackTrace();
+          }
+
+          return forecasts;
+     }
+
+     /**
+      * Fetch daily forecast data by coordinates
+      * 
+      * @param lat Latitude
+      * @param lon Longitude
+      * @return List of daily forecasts (next 7-10 days)
+      * @throws IOException if API call fails
+      */
+     public List<DailyForecast> getDailyForecast(double lat, double lon) throws IOException {
+          if (API_KEY == null || API_KEY.equals("YOUR_API_KEY_HERE")) {
+               throw new IOException("API key not configured");
+          }
+
+          String forecastUrl = "https://api.openweathermap.org/data/2.5/forecast";
+          String url = String.format("%s?lat=%f&lon=%f&appid=%s&units=metric&cnt=40",
+                    forecastUrl, lat, lon, API_KEY);
+
+          try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+               HttpGet request = new HttpGet(url);
+               try (CloseableHttpResponse response = httpClient.execute(request)) {
+                    int statusCode = response.getStatusLine().getStatusCode();
+                    String responseBody = EntityUtils.toString(response.getEntity());
+
+                    if (statusCode == 200) {
+                         return parseDailyForecast(responseBody);
+                    } else {
+                         throw new IOException("Forecast API error: " + statusCode);
+                    }
+               }
+          }
+     }
+
+     /**
+      * Parse daily forecast response and aggregate by day
+      */
+     private List<DailyForecast> parseDailyForecast(String jsonResponse) {
+          Map<String, DailyForecast> dailyMap = new LinkedHashMap<>();
+          SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+          try {
+               JsonObject jsonObject = JsonParser.parseString(jsonResponse).getAsJsonObject();
+               JsonArray list = jsonObject.getAsJsonArray("list");
+
+               for (JsonElement element : list) {
+                    JsonObject item = element.getAsJsonObject();
+
+                    long timestamp = item.get("dt").getAsLong() * 1000;
+                    Date date = new Date(timestamp);
+                    String dateKey = dateFormat.format(date);
+
+                    JsonObject main = item.getAsJsonObject("main");
+                    double temp = main.get("temp").getAsDouble();
+                    int humidity = main.get("humidity").getAsInt();
+
+                    JsonObject weather = item.getAsJsonArray("weather").get(0).getAsJsonObject();
+                    String description = weather.get("description").getAsString();
+                    String icon = weather.get("icon").getAsString();
+
+                    if (!dailyMap.containsKey(dateKey)) {
+                         DailyForecast dailyForecast = new DailyForecast();
+                         dailyForecast.setDate(date);
+                         dailyForecast.setTempMin(temp);
+                         dailyForecast.setTempMax(temp);
+                         dailyForecast.setHumidity(humidity);
+                         dailyForecast.setDescription(description);
+                         dailyForecast.setIcon(icon);
+                         dailyMap.put(dateKey, dailyForecast);
+                    } else {
+                         DailyForecast existing = dailyMap.get(dateKey);
+                         if (temp < existing.getTempMin()) {
+                              existing.setTempMin(temp);
+                         }
+                         if (temp > existing.getTempMax()) {
+                              existing.setTempMax(temp);
+                         }
+                    }
+               }
+          } catch (Exception e) {
+               System.err.println("[ERROR] Failed to parse daily forecast: " + e.getMessage());
+               e.printStackTrace();
+          }
+
+          return new ArrayList<>(dailyMap.values());
      }
 }

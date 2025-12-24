@@ -17,6 +17,8 @@ public class Weather {
      private String icon;
      private int pressure;
      private Timestamp searchedAt;
+     private double latitude;
+     private double longitude;
 
      // Constructors
      public Weather() {
@@ -122,6 +124,22 @@ public class Weather {
 
      public void setSearchedAt(Timestamp searchedAt) {
           this.searchedAt = searchedAt;
+     }
+
+     public double getLatitude() {
+          return latitude;
+     }
+
+     public void setLatitude(double latitude) {
+          this.latitude = latitude;
+     }
+
+     public double getLongitude() {
+          return longitude;
+     }
+
+     public void setLongitude(double longitude) {
+          this.longitude = longitude;
      }
 
      @Override

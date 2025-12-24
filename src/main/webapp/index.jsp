@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather Forecast - Your Global Weather Source</title>
+    <title>Prakiraan Cuaca - Sumber Cuaca Global Anda</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -96,11 +96,27 @@
                 </div>
                 <div class="hidden md:flex items-center space-x-6">
                     <a href="${pageContext.request.contextPath}/" class="text-gray-700 hover:text-gray-900 font-medium transition">
-                        <i class="fas fa-home mr-1"></i> Home
+                        <i class="fas fa-home mr-1"></i> Beranda
                     </a>
                     <a href="${pageContext.request.contextPath}/history" class="text-gray-700 hover:text-gray-900 font-medium transition">
-                        <i class="fas fa-history mr-1"></i> History
+                        <i class="fas fa-history mr-1"></i> Riwayat
                     </a>
+                    <a href="${pageContext.request.contextPath}/favorites" class="text-gray-700 hover:text-gray-900 font-medium transition">
+                        <i class="fas fa-heart mr-1"></i> Favorit
+                    </a>
+                    <% if (session.getAttribute("loggedInUser") != null) { %>
+                        <span class="text-gray-600 text-sm">Selamat datang, <strong><%= session.getAttribute("loggedInUser") %></strong></span>
+                        <a href="${pageContext.request.contextPath}/logout" class="text-gray-700 hover:text-gray-900 font-medium transition">
+                            <i class="fas fa-sign-out-alt mr-1"></i> Keluar
+                        </a>
+                    <% } else { %>
+                        <a href="${pageContext.request.contextPath}/login" class="text-gray-700 hover:text-gray-900 font-medium transition">
+                            <i class="fas fa-sign-in-alt mr-1"></i> Masuk
+                        </a>
+                        <a href="${pageContext.request.contextPath}/register" class="text-gray-700 hover:text-gray-900 font-medium transition">
+                            <i class="fas fa-user-plus mr-1"></i> Daftar
+                        </a>
+                    <% } %>
                 </div>
             </div>
         </div>
@@ -110,17 +126,17 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div class="text-center mb-12">
             <h1 class="text-5xl md:text-6xl font-bold text-white mb-4">
-                Global Weather Forecast
+                Prakiraan Cuaca Global
             </h1>
             <p class="text-xl text-white text-opacity-90 max-w-2xl mx-auto">
-                Get accurate real-time weather information for any location worldwide
+                Dapatkan informasi cuaca real-time yang akurat untuk lokasi mana pun di seluruh dunia
             </p>
         </div>
 
         <!-- Main Search Container -->
         <div class="max-w-3xl mx-auto mb-12">
             <div class="search-container p-8">
-                <h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">Search Weather by Location</h2>
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">Cari Cuaca Berdasarkan Lokasi</h2>
                 
                 <!-- Search Form -->
                 <form action="${pageContext.request.contextPath}/weather" method="GET" class="space-y-4" id="searchForm">
@@ -132,7 +148,7 @@
                             type="text"
                             name="city"
                             id="cityInput"
-                            placeholder="Enter city name (e.g., Jakarta, London, Tokyo)..."
+                            placeholder="Masukkan nama kota (contoh: Jakarta, Surabaya, Bandung)..."
                             class="search-input w-full pl-12 pr-4 py-4 text-lg border-2 border-gray-200 rounded-lg focus:border-gray-800 transition"
                             required
                             autocomplete="off"
@@ -145,14 +161,14 @@
                         class="w-full bg-gradient-to-r from-gray-800 to-gray-900 text-white py-4 rounded-lg font-semibold text-lg hover:from-gray-900 hover:to-black transition transform hover:scale-105 active:scale-95 shadow-lg"
                     >
                         <i class="fas fa-search mr-2"></i>
-                        Search Weather
+                        Cari Cuaca
                     </button>
                 </form>
                 
                 <!-- Divider -->
                 <div class="flex items-center my-6">
                     <div class="flex-1 border-t border-gray-300"></div>
-                    <span class="px-4 text-gray-500 text-sm font-medium">OR</span>
+                    <span class="px-4 text-gray-500 text-sm font-medium">ATAU</span>
                     <div class="flex-1 border-t border-gray-300"></div>
                 </div>
                 
@@ -163,14 +179,14 @@
                     class="w-full bg-white border-2 border-gray-800 text-gray-800 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition transform hover:scale-105 active:scale-95"
                 >
                     <i class="fas fa-location-crosshairs mr-2"></i>
-                    Use My Current Location
+                    Gunakan Lokasi Saya Saat Ini
                 </button>
                 
                 <!-- Loading Indicator -->
                 <div id="loadingIndicator" class="hidden mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                     <div class="flex items-center justify-center text-blue-700">
                         <i class="fas fa-spinner fa-spin mr-2"></i>
-                        <span>Detecting your location...</span>
+                        <span>Mendeteksi lokasi Anda...</span>
                     </div>
                 </div>
                 
@@ -190,20 +206,20 @@
         <div class="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             <div class="feature-card rounded-xl p-6 text-center">
                 <i class="fas fa-temperature-high text-5xl text-white mb-4"></i>
-                <h3 class="text-xl font-semibold text-white mb-2">Real-Time Data</h3>
-                <p class="text-white text-opacity-80">Get up-to-date weather information powered by OpenWeatherMap API</p>
+                <h3 class="text-xl font-semibold text-white mb-2">Data Real-Time</h3>
+                <p class="text-white text-opacity-80">Dapatkan informasi cuaca terkini yang didukung oleh OpenWeatherMap API</p>
             </div>
             
             <div class="feature-card rounded-xl p-6 text-center">
                 <i class="fas fa-globe text-5xl text-white mb-4"></i>
-                <h3 class="text-xl font-semibold text-white mb-2">Global Coverage</h3>
-                <p class="text-white text-opacity-80">Access weather data for cities worldwide in seconds</p>
+                <h3 class="text-xl font-semibold text-white mb-2">Cakupan Global</h3>
+                <p class="text-white text-opacity-80">Akses data cuaca untuk kota-kota di seluruh dunia dalam hitungan detik</p>
             </div>
             
             <div class="feature-card rounded-xl p-6 text-center">
                 <i class="fas fa-database text-5xl text-white mb-4"></i>
-                <h3 class="text-xl font-semibold text-white mb-2">Search History</h3>
-                <p class="text-white text-opacity-80">View your recent weather searches anytime</p>
+                <h3 class="text-xl font-semibold text-white mb-2">Riwayat Pencarian</h3>
+                <p class="text-white text-opacity-80">Lihat pencarian cuaca terbaru Anda kapan saja</p>
             </div>
         </div>
     </div>
@@ -211,7 +227,7 @@
     <!-- Footer -->
     <footer class="mt-16 py-8 bg-black bg-opacity-20">
         <div class="max-w-7xl mx-auto px-4 text-center">
-            <p class="text-white text-opacity-70 text-sm">© 2025 WeatherNow. All rights reserved.</p>
+            <p class="text-white text-opacity-70 text-sm">© 2025 WeatherNow. Seluruh hak cipta dilindungi.</p>
         </div>
     </footer>
     
@@ -240,7 +256,7 @@
             }
             
             try {
-                dropdown.innerHTML = '<div class="autocomplete-loading"><i class="fas fa-spinner fa-spin mr-2"></i>Searching cities...</div>';
+                dropdown.innerHTML = '<div class="autocomplete-loading"><i class="fas fa-spinner fa-spin mr-2"></i>Mencari kota...</div>';
                 dropdown.classList.remove('hidden');
                 
                 const response = await fetch(
@@ -254,14 +270,14 @@
                 cities = await response.json();
                 
                 if (cities.length === 0) {
-                    dropdown.innerHTML = '<div class="autocomplete-loading">No cities found</div>';
+                    dropdown.innerHTML = '<div class="autocomplete-loading">Kota tidak ditemukan</div>';
                     return;
                 }
                 
                 displayCities(cities);
             } catch (error) {
                 console.error('Error fetching cities:', error);
-                dropdown.innerHTML = '<div class="autocomplete-loading text-red-600">Error loading cities</div>';
+                dropdown.innerHTML = '<div class="autocomplete-loading text-red-600">Gagal memuat kota</div>';
             }
         }
         
@@ -362,7 +378,7 @@
             const loadingIndicator = document.getElementById('loadingIndicator');
             
             if (!navigator.geolocation) {
-                alert('Geolocation is not supported by your browser');
+                alert('Geolokasi tidak didukung oleh browser Anda');
                 return;
             }
             
@@ -381,22 +397,22 @@
                 },
                 function(error) {
                     loadingIndicator.classList.add('hidden');
-                    let errorMessage = 'Unable to get your location';
+                    let errorMessage = 'Tidak dapat mendapatkan lokasi Anda';
                     
                     console.error('Geolocation error:', error);
                     
                     switch(error.code) {
                         case error.PERMISSION_DENIED:
-                            errorMessage = 'Location access denied. Please enable location permissions in your browser settings.';
+                            errorMessage = 'Akses lokasi ditolak. Silakan aktifkan izin lokasi di pengaturan browser Anda.';
                             break;
                         case error.POSITION_UNAVAILABLE:
-                            errorMessage = 'Location information unavailable. Please check your device settings.';
+                            errorMessage = 'Informasi lokasi tidak tersedia. Silakan periksa pengaturan perangkat Anda.';
                             break;
                         case error.TIMEOUT:
-                            errorMessage = 'Location request timed out. Please try again or enter city manually.';
+                            errorMessage = 'Permintaan lokasi habis waktu. Silakan coba lagi atau masukkan kota secara manual.';
                             break;
                         default:
-                            errorMessage = 'An unknown error occurred: ' + error.message;
+                            errorMessage = 'Terjadi kesalahan yang tidak diketahui: ' + error.message;
                     }
                     
                     alert(errorMessage);

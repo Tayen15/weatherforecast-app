@@ -1,6 +1,8 @@
 package com.weatherforecast.servlet;
 
 import com.weatherforecast.dao.WeatherDAO;
+import com.weatherforecast.model.DailyForecast;
+import com.weatherforecast.model.HourlyForecast;
 import com.weatherforecast.model.Weather;
 import com.weatherforecast.service.WeatherService;
 
@@ -10,6 +12,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -89,6 +92,23 @@ public class WeatherServlet extends HttpServlet {
                System.out.println("[DEBUG] Saving weather data to database for user: " + userId);
                boolean saved = weatherDAO.saveWeather(weather, userId);
                System.out.println("[DEBUG] Database save result: " + saved);
+
+               // Fetch forecast data using the weather's coordinates
+               try {
+                    double lat = weather.getLatitude();
+                    double lon = weather.getLongitude();
+
+                    if (lat != 0 || lon != 0) {
+                         List<HourlyForecast> hourlyForecasts = weatherService.getHourlyForecast(lat, lon);
+                         List<DailyForecast> dailyForecasts = weatherService.getDailyForecast(lat, lon);
+
+                         request.setAttribute("hourlyForecasts", hourlyForecasts);
+                         request.setAttribute("dailyForecasts", dailyForecasts);
+                    }
+               } catch (Exception e) {
+                    System.err.println("[WARN] Could not fetch forecast data: " + e.getMessage());
+                    // Continue without forecast data
+               }
 
                // Set attributes for JSP
                request.setAttribute("weather", weather);

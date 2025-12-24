@@ -1,13 +1,20 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page isELIgnored="false" %>
 <%@ page import="com.weatherforecast.model.Weather" %>
+<%@ page import="com.weatherforecast.model.HourlyForecast" %>
+<%@ page import="com.weatherforecast.model.DailyForecast" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.text.SimpleDateFormat" %>
+<%@ page import="java.util.Locale" %>
 <%
     Weather weather = (Weather) request.getAttribute("weather");
     String iconUrl = (String) request.getAttribute("iconUrl");
-    String errorMessage = (String) request.getAttribute("error");
+    String requestError = (String) request.getAttribute("error");
+    List<HourlyForecast> hourlyForecasts = (List<HourlyForecast>) request.getAttribute("hourlyForecasts");
+    List<DailyForecast> dailyForecasts = (List<DailyForecast>) request.getAttribute("dailyForecasts");
     
     // If error or weather is null, redirect to home
-    if (weather == null || errorMessage != null) {
+    if (weather == null || requestError != null) {
         response.sendRedirect(request.getContextPath() + "/");
         return;
     }
@@ -69,11 +76,27 @@
                 </div>
                 <div class="hidden md:flex items-center space-x-6">
                     <a href="${pageContext.request.contextPath}/" class="text-gray-700 hover:text-gray-900 font-medium transition">
-                        <i class="fas fa-home mr-1"></i> Home
+                        <i class="fas fa-home mr-1"></i> Beranda
                     </a>
                     <a href="${pageContext.request.contextPath}/history" class="text-gray-700 hover:text-gray-900 font-medium transition">
-                        <i class="fas fa-history mr-1"></i> History
+                        <i class="fas fa-history mr-1"></i> Riwayat
                     </a>
+                    <a href="${pageContext.request.contextPath}/favorites" class="text-gray-700 hover:text-gray-900 font-medium transition">
+                        <i class="fas fa-heart mr-1"></i> Favorit
+                    </a>
+                    <% if (session.getAttribute("loggedInUser") != null) { %>
+                        <span class="text-gray-600 text-sm">Selamat datang, <strong><%= session.getAttribute("loggedInUser") %></strong></span>
+                        <a href="${pageContext.request.contextPath}/logout" class="text-gray-700 hover:text-gray-900 font-medium transition">
+                            <i class="fas fa-sign-out-alt mr-1"></i> Keluar
+                        </a>
+                    <% } else { %>
+                        <a href="${pageContext.request.contextPath}/login" class="text-gray-700 hover:text-gray-900 font-medium transition">
+                            <i class="fas fa-sign-in-alt mr-1"></i> Masuk
+                        </a>
+                        <a href="${pageContext.request.contextPath}/register" class="text-gray-700 hover:text-gray-900 font-medium transition">
+                            <i class="fas fa-user-plus mr-1"></i> Daftar
+                        </a>
+                    <% } %>
                 </div>
             </div>
         </div>
@@ -81,15 +104,56 @@
 
     <!-- Main Content -->
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Success/Error Messages -->
+        <% 
+        String successMessage = (String) session.getAttribute("successMessage");
+        String errorMessage = (String) session.getAttribute("errorMessage");
+        if (successMessage != null) {
+            session.removeAttribute("successMessage");
+        %>
+            <div class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg relative" role="alert">
+                <span class="block sm:inline"><i class="fas fa-check-circle mr-2"></i><%= successMessage %></span>
+            </div>
+        <% 
+        } 
+        if (errorMessage != null) {
+            session.removeAttribute("errorMessage");
+        %>
+            <div class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative" role="alert">
+                <span class="block sm:inline"><i class="fas fa-exclamation-circle mr-2"></i><%= errorMessage %></span>
+            </div>
+        <% } %>
+
         <!-- Location Header -->
         <div class="text-center mb-8">
             <div class="inline-flex items-center bg-white bg-opacity-20 backdrop-blur-md px-6 py-3 rounded-full mb-4">
                 <i class="fas fa-map-marker-alt text-white text-xl mr-2"></i>
-                <h1 class="text-3xl font-bold text-white">
+                <h1 class="text-3xl font-bold text-white mr-4">
                     <%= weather.getCity() %>, <%= weather.getCountry() %>
                 </h1>
+                <% if (session.getAttribute("loggedInUser") != null) { %>
+                    <!-- Show heart button for logged in users -->
+                    <form action="${pageContext.request.contextPath}/favorites" method="POST" class="inline">
+                        <input type="hidden" name="action" value="add">
+                        <input type="hidden" name="city" value="<%= weather.getCity() %>">
+                        <input type="hidden" name="country" value="<%= weather.getCountry() %>">
+                        <button type="submit" class="text-red-400 hover:text-red-500 transition-colors" title="Tambahkan ke Favorit">
+                            <i class="fas fa-heart text-2xl"></i>
+                        </button>
+                    </form>
+                <% } else { %>
+                    <!-- Show login prompt for non-logged in users -->
+                    <a href="${pageContext.request.contextPath}/login" class="text-white text-opacity-70 hover:text-opacity-100 transition-colors" title="Masuk untuk menyimpan favorit">
+                        <i class="far fa-heart text-2xl"></i>
+                    </a>
+                <% } %>
             </div>
             <p class="text-white text-xl capitalize"><%= weather.getDescription() %></p>
+            <% if (session.getAttribute("loggedInUser") == null) { %>
+                <p class="text-white text-sm text-opacity-70 mt-2">
+                    <i class="fas fa-info-circle mr-1"></i>Masuk untuk menyimpan lokasi ini ke favorit Anda
+                </p>
+            <% } %>
         </div>
 
         <!-- Main Weather Display -->
@@ -103,7 +167,7 @@
                             <%= String.format("%.0f", weather.getTemperature()) %>°
                         </div>
                         <div class="text-2xl text-gray-600 mt-2">
-                            Feels like <%= String.format("%.0f", weather.getFeelsLike()) %>°C
+                            Terasa seperti <%= String.format("%.0f", weather.getFeelsLike()) %>°C
                         </div>
                     </div>
                 </div>
@@ -112,11 +176,11 @@
                 <div class="flex flex-col space-y-3">
                     <a href="${pageContext.request.contextPath}/" 
                        class="px-6 py-3 bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-lg font-semibold hover:from-gray-900 hover:to-black transition text-center">
-                        <i class="fas fa-search mr-2"></i>New Search
+                        <i class="fas fa-search mr-2"></i>Pencarian Baru
                     </a>
                     <a href="${pageContext.request.contextPath}/history" 
                        class="px-6 py-3 bg-white border-2 border-gray-800 text-gray-800 rounded-lg font-semibold hover:bg-gray-100 transition text-center">
-                        <i class="fas fa-history mr-2"></i>View History
+                        <i class="fas fa-history mr-2"></i>Lihat Riwayat
                     </a>
                 </div>
             </div>
@@ -127,14 +191,14 @@
             <!-- Humidity -->
             <div class="weather-detail-card p-6 text-center">
                 <i class="fas fa-droplet text-4xl text-gray-600 mb-3"></i>
-                <div class="text-gray-600 text-sm font-medium mb-1">Humidity</div>
+                <div class="text-gray-600 text-sm font-medium mb-1">Kelembaban</div>
                 <div class="text-3xl font-bold text-gray-800"><%= weather.getHumidity() %>%</div>
             </div>
             
             <!-- Wind Speed -->
             <div class="weather-detail-card p-6 text-center">
                 <i class="fas fa-wind text-4xl text-gray-600 mb-3"></i>
-                <div class="text-gray-600 text-sm font-medium mb-1">Wind Speed</div>
+                <div class="text-gray-600 text-sm font-medium mb-1">Kecepatan Angin</div>
                 <div class="text-3xl font-bold text-gray-800"><%= String.format("%.1f", weather.getWindSpeed()) %></div>
                 <div class="text-xs text-gray-500">m/s</div>
             </div>
@@ -142,7 +206,7 @@
             <!-- Pressure -->
             <div class="weather-detail-card p-6 text-center">
                 <i class="fas fa-gauge-high text-4xl text-gray-600 mb-3"></i>
-                <div class="text-gray-600 text-sm font-medium mb-1">Pressure</div>
+                <div class="text-gray-600 text-sm font-medium mb-1">Tekanan</div>
                 <div class="text-3xl font-bold text-gray-800"><%= weather.getPressure() %></div>
                 <div class="text-xs text-gray-500">hPa</div>
             </div>
@@ -150,31 +214,100 @@
             <!-- Temperature Range -->
             <div class="weather-detail-card p-6 text-center">
                 <i class="fas fa-temperature-half text-4xl text-gray-600 mb-3"></i>
-                <div class="text-gray-600 text-sm font-medium mb-1">Temperature</div>
+                <div class="text-gray-600 text-sm font-medium mb-1">Temperatur</div>
                 <div class="text-3xl font-bold text-gray-800"><%= String.format("%.0f", weather.getTemperature()) %>°C</div>
             </div>
         </div>
 
+        <!-- Hourly Forecast Section -->
+        <% if (hourlyForecasts != null && !hourlyForecasts.isEmpty()) { %>
+        <div class="weather-main-card p-6 mb-8">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">
+                <i class="fas fa-clock mr-2 text-gray-700"></i>Per Jam
+            </h3>
+            <div class="flex overflow-x-auto space-x-4 pb-4">
+                <% 
+                SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
+                for (HourlyForecast forecast : hourlyForecasts) { 
+                    String condition = forecast.getCondition() != null ? forecast.getCondition().toUpperCase() : "BERAWAN";
+                    boolean isNight = forecast.getIcon() != null && forecast.getIcon().contains("n");
+                    String bgColor = isNight ? "bg-gray-700" : "bg-gray-100";
+                    String textColor = isNight ? "text-white" : "text-gray-800";
+                %>
+                    <div class="<%= bgColor %> rounded-lg p-4 min-w-[140px] text-center">
+                        <div class="<%= textColor %> font-medium mb-2"><%= timeFormat.format(forecast.getDateTime()) %> WIB</div>
+                        <img src="<%= com.weatherforecast.service.WeatherService.getIconUrl(forecast.getIcon()) %>" 
+                             alt="<%= forecast.getDescription() %>" 
+                             class="w-16 h-16 mx-auto mb-2">
+                        <div class="<%= textColor %> text-2xl font-bold mb-1">
+                            <%= String.format("%.0f", forecast.getTemperature()) %> °C
+                        </div>
+                        <div class="<%= textColor %> text-sm font-medium mb-2"><%= condition %></div>
+                        <div class="<%= textColor %> text-sm mb-1">
+                            <i class="fas fa-droplet mr-1"></i><%= forecast.getHumidity() %> %
+                        </div>
+                        <div class="<%= textColor %> text-sm">
+                            <i class="fas fa-wind mr-1"></i><%= String.format("%.1f", forecast.getWindSpeed()) %> km/h
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+        <% } %>
+
+        <!-- Daily Forecast Section -->
+        <% if (dailyForecasts != null && !dailyForecasts.isEmpty()) { %>
+        <div class="weather-main-card p-6 mb-8">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">
+                <i class="fas fa-calendar-alt mr-2 text-gray-700"></i>Suhu Mingguan
+            </h3>
+            <div class="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-10 gap-4">
+                <% 
+                SimpleDateFormat dayFormat = new SimpleDateFormat("dd MMMM", new Locale("id", "ID"));
+                SimpleDateFormat headerFormat = new SimpleDateFormat("EEEE", new Locale("id", "ID"));
+                int dayCount = 0;
+                for (DailyForecast forecast : dailyForecasts) { 
+                    if (dayCount >= 10) break; // Limit to 10 days
+                    String headerText = dayCount == 0 ? "Hari Ini" : headerFormat.format(forecast.getDate());
+                    dayCount++;
+                %>
+                    <div class="bg-gray-100 rounded-lg p-4 text-center">
+                        <div class="text-cyan-600 font-medium mb-2"><%= headerText %></div>
+                        <img src="<%= com.weatherforecast.service.WeatherService.getIconUrl(forecast.getIcon()) %>" 
+                             alt="<%= forecast.getDescription() %>" 
+                             class="w-16 h-16 mx-auto mb-2">
+                        <div class="text-gray-800 text-2xl font-bold mb-1">
+                            <%= String.format("%.0f", forecast.getTempMax()) %>°
+                        </div>
+                        <div class="text-gray-600 text-sm mb-2">
+                            <i class="fas fa-droplet mr-1"></i><%= forecast.getHumidity() %> %
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+        <% } %>
+
         <!-- Additional Info Card -->
         <div class="weather-main-card p-6">
             <h3 class="text-xl font-semibold text-gray-800 mb-4">
-                <i class="fas fa-info-circle mr-2 text-gray-700"></i>Weather Details
+                <i class="fas fa-info-circle mr-2 text-gray-700"></i>Detail Cuaca
             </h3>
             <div class="grid md:grid-cols-2 gap-4">
                 <div class="flex justify-between items-center py-3 border-b border-gray-200">
-                    <span class="text-gray-600">Condition</span>
+                    <span class="text-gray-600">Kondisi</span>
                     <span class="font-semibold text-gray-800 capitalize"><%= weather.getDescription() %></span>
                 </div>
                 <div class="flex justify-between items-center py-3 border-b border-gray-200">
-                    <span class="text-gray-600">Feels Like</span>
+                    <span class="text-gray-600">Terasa Seperti</span>
                     <span class="font-semibold text-gray-800"><%= String.format("%.1f", weather.getFeelsLike()) %>°C</span>
                 </div>
                 <div class="flex justify-between items-center py-3 border-b border-gray-200">
-                    <span class="text-gray-600">Humidity Level</span>
+                    <span class="text-gray-600">Tingkat Kelembaban</span>
                     <span class="font-semibold text-gray-800"><%= weather.getHumidity() %>%</span>
                 </div>
                 <div class="flex justify-between items-center py-3 border-b border-gray-200">
-                    <span class="text-gray-600">Air Pressure</span>
+                    <span class="text-gray-600">Tekanan Udara</span>
                     <span class="font-semibold text-gray-800"><%= weather.getPressure() %> hPa</span>
                 </div>
             </div>
@@ -184,7 +317,7 @@
     <!-- Footer -->
     <footer class="mt-16 py-8 bg-black bg-opacity-20">
         <div class="max-w-7xl mx-auto px-4 text-center">
-            <p class="text-white text-opacity-70 text-sm">© 2025 WeatherNow. All rights reserved.</p>
+            <p class="text-white text-opacity-70 text-sm">© 2025 WeatherNow. Seluruh hak cipta dilindungi.</p>
         </div>
     </footer>
 </body>

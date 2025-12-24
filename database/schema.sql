@@ -37,6 +37,29 @@ CREATE INDEX IF NOT EXISTS idx_city ON weather_history(city);
 CREATE INDEX IF NOT EXISTS idx_searched_at ON weather_history(searched_at DESC);
 CREATE INDEX IF NOT EXISTS idx_user_searched ON weather_history(user_id, searched_at DESC);
 
+-- Table 2: Users (For future authentication features)
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table 3: Favorite Locations (To store user's favorite cities)
+CREATE TABLE IF NOT EXISTS favorite_locations (
+    id SERIAL PRIMARY KEY,
+    user_identifier VARCHAR(100) NOT NULL, -- Corresponds to user_id in weather_history
+    city VARCHAR(100) NOT NULL,
+    country VARCHAR(10) NOT NULL,
+    notes VARCHAR(255),
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_user_city UNIQUE(user_identifier, city)
+);
+
+-- Create index for favorite_locations
+CREATE INDEX IF NOT EXISTS idx_fav_user ON favorite_locations(user_identifier);
+
 -- Sample query to verify table creation
 -- SELECT * FROM weather_history;
 

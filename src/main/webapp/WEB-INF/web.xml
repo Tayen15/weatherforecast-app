@@ -43,6 +43,50 @@
     <url-pattern>/api/weather</url-pattern>
   </servlet-mapping>
 
+  <!-- Favorite Servlet -->
+  <servlet>
+    <servlet-name>FavoriteServlet</servlet-name>
+    <servlet-class>com.weatherforecast.servlet.FavoriteServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>FavoriteServlet</servlet-name>
+    <url-pattern>/favorites</url-pattern>
+  </servlet-mapping>
+
+  <!-- User Servlet -->
+  <servlet>
+    <servlet-name>UserServlet</servlet-name>
+    <servlet-class>com.weatherforecast.servlet.UserServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>UserServlet</servlet-name>
+    <url-pattern>/register</url-pattern>
+  </servlet-mapping>
+
+  <!-- Login Servlet -->
+  <servlet>
+    <servlet-name>LoginServlet</servlet-name>
+    <servlet-class>com.weatherforecast.servlet.LoginServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>LoginServlet</servlet-name>
+    <url-pattern>/login</url-pattern>
+  </servlet-mapping>
+
+  <!-- Logout Servlet -->
+  <servlet>
+    <servlet-name>LogoutServlet</servlet-name>
+    <servlet-class>com.weatherforecast.servlet.LogoutServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>LogoutServlet</servlet-name>
+    <url-pattern>/logout</url-pattern>
+  </servlet-mapping>
+
   <!-- Error Pages -->
   <error-page>
     <error-code>404</error-code>
