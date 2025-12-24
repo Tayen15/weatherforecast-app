@@ -38,7 +38,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center space-x-3">
-                    <i class="fas fa-cloud-sun text-3xl gradient-text"></i>
+                    <img src="${pageContext.request.contextPath}/images/logo.png" alt="WeatherNow Logo" class="h-10 w-10 object-contain">
                     <span class="text-xl font-bold text-gray-800">WeatherNow</span>
                 </div>
                 <div class="hidden md:flex items-center space-x-6">
