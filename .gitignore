@@ -73,7 +73,8 @@ desktop.ini
 *.sqlite
 
 # Configuration files (uncomment if you want to exclude config with sensitive data)
-# src/main/resources/config.properties
+src/main/resources/config.properties
+config.properties
 
 # Backup files
 *.backup
