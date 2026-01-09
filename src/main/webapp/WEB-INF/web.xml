@@ -87,6 +87,28 @@
     <url-pattern>/logout</url-pattern>
   </servlet-mapping>
 
+  <!-- News Servlet -->
+  <servlet>
+    <servlet-name>NewsServlet</servlet-name>
+    <servlet-class>com.weatherforecast.servlet.NewsServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>NewsServlet</servlet-name>
+    <url-pattern>/news</url-pattern>
+  </servlet-mapping>
+
+  <!-- Admin News Servlet -->
+  <servlet>
+    <servlet-name>AdminNewsServlet</servlet-name>
+    <servlet-class>com.weatherforecast.servlet.AdminNewsServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>AdminNewsServlet</servlet-name>
+    <url-pattern>/admin/news</url-pattern>
+  </servlet-mapping>
+
   <!-- Error Pages -->
   <error-page>
     <error-code>404</error-code>

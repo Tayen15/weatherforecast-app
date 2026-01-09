@@ -44,9 +44,15 @@ public class LoginServlet extends HttpServlet {
                HttpSession session = request.getSession();
                session.setAttribute("loggedInUser", user.getUsername());
                session.setAttribute("userId", user.getUsername());
+               session.setAttribute("user", user);
+               session.setAttribute("userRole", user.getRole());
 
-               // Redirect to home page
-               response.sendRedirect(request.getContextPath() + "/");
+               // Redirect based on role
+               if ("admin".equalsIgnoreCase(user.getRole())) {
+                    response.sendRedirect(request.getContextPath() + "/admin/news");
+               } else {
+                    response.sendRedirect(request.getContextPath() + "/");
+               }
           } else {
                // Login failed
                request.setAttribute("error", "Invalid username/email or password.");

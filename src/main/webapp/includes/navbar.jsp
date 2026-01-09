@@ -25,10 +25,16 @@
                    class="<%= currentPage.contains("/about.jsp") ? "text-gray-900 font-semibold border-b-2 border-gray-800" : "text-gray-700 hover:text-gray-900 font-medium" %> transition">
                     <i class="fas fa-info-circle mr-1"></i> Tentang
                 </a>
+                <a href="${pageContext.request.contextPath}/news" 
+                   class="<%= currentPage.contains("/news") ? "text-gray-900 font-semibold border-b-2 border-gray-800" : "text-gray-700 hover:text-gray-900 font-medium" %> transition">
+                    <i class="fas fa-newspaper mr-1"></i> Berita
+                </a>
                 <% 
                     Object user = session.getAttribute("user");
                     Object loggedInUser = session.getAttribute("loggedInUser");
+                    String userRole = (String) session.getAttribute("userRole");
                     boolean isLoggedIn = (user != null || loggedInUser != null);
+                    boolean isAdmin = "admin".equals(userRole);
                     
                     if (isLoggedIn) { 
                         String username = (loggedInUser != null) ? loggedInUser.toString() : user.toString();
@@ -37,6 +43,12 @@
                        class="<%= currentPage.contains("/favorites") ? "text-gray-900 font-semibold border-b-2 border-gray-800" : "text-gray-700 hover:text-gray-900 font-medium" %> transition">
                         <i class="fas fa-heart mr-1"></i> Favorit
                     </a>
+                    <% if (isAdmin) { %>
+                        <a href="${pageContext.request.contextPath}/admin/news" 
+                           class="<%= currentPage.contains("/admin/") ? "text-gray-900 font-semibold border-b-2 border-gray-800" : "text-gray-700 hover:text-gray-900 font-medium" %> transition">
+                            <i class="fas fa-user-shield mr-1"></i> Admin
+                        </a>
+                    <% } %>
                     <span class="text-gray-600 text-sm">Selamat datang, <strong><%= username %></strong></span>
                     <a href="${pageContext.request.contextPath}/logout" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition">
                         <i class="fas fa-sign-out-alt mr-1"></i> Keluar

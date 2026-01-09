@@ -17,7 +17,7 @@ public class UserDAO {
       * @return true if registered successfully
       */
      public boolean registerUser(User user) {
-          String sql = "INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)";
+          String sql = "INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, ?)";
 
           try (Connection conn = DatabaseConfig.getConnection();
                     PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -25,6 +25,7 @@ public class UserDAO {
                pstmt.setString(1, user.getUsername());
                pstmt.setString(2, user.getEmail());
                pstmt.setString(3, user.getPasswordHash());
+               pstmt.setString(4, user.getRole() != null ? user.getRole() : "user");
 
                return pstmt.executeUpdate() > 0;
 
@@ -55,6 +56,7 @@ public class UserDAO {
                          user.setUsername(rs.getString("username"));
                          user.setEmail(rs.getString("email"));
                          user.setPasswordHash(rs.getString("password_hash"));
+                         user.setRole(rs.getString("role"));
                          user.setCreatedAt(rs.getTimestamp("created_at"));
                          return user;
                     }
@@ -87,6 +89,7 @@ public class UserDAO {
                          user.setUsername(rs.getString("username"));
                          user.setEmail(rs.getString("email"));
                          user.setPasswordHash(rs.getString("password_hash"));
+                         user.setRole(rs.getString("role"));
                          user.setCreatedAt(rs.getTimestamp("created_at"));
                          return user;
                     }

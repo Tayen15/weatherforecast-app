@@ -10,7 +10,10 @@
 -- Drop dependent view first to avoid errors when re-running the script
 DROP VIEW IF EXISTS recent_weather_searches;
 
--- Drop table if exists (cascade to clean dependencies)
+-- Drop tables if exists (cascade to clean dependencies)
+DROP TABLE IF EXISTS news CASCADE;
+DROP TABLE IF EXISTS favorite_locations CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS weather_history CASCADE;
 
 -- Create weather_history table
@@ -37,14 +40,18 @@ CREATE INDEX IF NOT EXISTS idx_city ON weather_history(city);
 CREATE INDEX IF NOT EXISTS idx_searched_at ON weather_history(searched_at DESC);
 CREATE INDEX IF NOT EXISTS idx_user_searched ON weather_history(user_id, searched_at DESC);
 
--- Table 2: Users (For future authentication features)
+-- Table 2: Users (For authentication with role-based access)
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
+    role VARCHAR(20) NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin')),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Create index for role-based queries
+CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
 
 -- Table 3: Favorite Locations (To store user's favorite cities)
 CREATE TABLE IF NOT EXISTS favorite_locations (
@@ -59,6 +66,36 @@ CREATE TABLE IF NOT EXISTS favorite_locations (
 
 -- Create index for favorite_locations
 CREATE INDEX IF NOT EXISTS idx_fav_user ON favorite_locations(user_identifier);
+
+-- Table 4: News (For news management by admin)
+CREATE TABLE IF NOT EXISTS news (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL,
+    author VARCHAR(100) NOT NULL,
+    image_url VARCHAR(500),
+    is_published BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create indexes for news table
+CREATE INDEX IF NOT EXISTS idx_news_published ON news(is_published, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_news_created ON news(created_at DESC);
+
+-- Trigger to auto-update updated_at timestamp
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_news_updated_at
+BEFORE UPDATE ON news
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
 
 -- Sample query to verify table creation
 -- SELECT * FROM weather_history;

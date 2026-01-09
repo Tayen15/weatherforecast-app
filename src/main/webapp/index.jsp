@@ -385,6 +385,107 @@
         }
     </script>
     
+    <!-- Latest News Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-2">
+                <i class="fas fa-newspaper mr-2"></i>Berita Terbaru
+            </h2>
+            <p class="text-white text-opacity-80">Informasi dan artikel terkini seputar cuaca</p>
+        </div>
+        
+        <div id="latestNews" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <!-- Will be loaded by JavaScript -->
+            <div class="text-center col-span-3 py-8">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                <p class="text-white mt-2">Memuat berita...</p>
+            </div>
+        </div>
+        
+        <div class="text-center">
+            <a href="${pageContext.request.contextPath}/news" 
+               class="inline-flex items-center px-6 py-3 bg-white text-gray-800 font-semibold rounded-lg hover:bg-gray-100 transition">
+                Lihat Semua Berita
+                <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+        </div>
+    </div>
+    
+    <script>
+        // Load latest news
+        const contextPath = '<%= request.getContextPath() %>';
+        fetch(contextPath + '/news?ajax=true&limit=3')
+            .then(response => response.json())
+            .then(data => {
+                const newsContainer = document.getElementById('latestNews');
+                
+                if (data.success && data.news && data.news.length > 0) {
+                    let html = '';
+                    data.news.forEach(news => {
+                        const imageHtml = news.imageUrl ? 
+                            '<img src="' + news.imageUrl + '" alt="' + escapeHtml(news.title) + '" class="w-full h-full object-cover rounded-lg">' :
+                            '<i class="fas fa-newspaper text-5xl text-white opacity-50"></i>';
+                        
+                        html += '<div class="feature-card rounded-lg p-6">' +
+                            '<div class="h-40 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg mb-4 flex items-center justify-center">' +
+                                imageHtml +
+                            '</div>' +
+                            '<h3 class="text-xl font-bold text-white mb-2">' + escapeHtml(news.title) + '</h3>' +
+                            '<p class="text-white text-opacity-80 mb-3 text-sm">' + escapeHtml(news.excerpt) + '</p>' +
+                            '<div class="flex items-center text-white text-opacity-60 text-xs mb-3">' +
+                                '<i class="fas fa-user mr-1"></i>' +
+                                '<span>' + escapeHtml(news.author) + '</span>' +
+                                '<span class="mx-2">•</span>' +
+                                '<i class="fas fa-calendar mr-1"></i>' +
+                                '<span>' + formatDate(news.createdAt) + '</span>' +
+                            '</div>' +
+                            '<a href="' + contextPath + '/news?id=' + news.id + '" ' +
+                               'class="inline-flex items-center text-white hover:text-opacity-80 font-semibold transition">' +
+                                'Baca Selengkapnya ' +
+                                '<i class="fas fa-arrow-right ml-2"></i>' +
+                            '</a>' +
+                        '</div>';
+                    });
+                    newsContainer.innerHTML = html;
+                } else {
+                    newsContainer.innerHTML =
+                        '<div class="col-span-3 text-center py-8">' +
+                            '<i class="fas fa-newspaper text-4xl text-white opacity-50 mb-2"></i>' +
+                            '<p class="text-white text-opacity-80">Belum ada berita terbaru</p>' +
+                        '</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading news:', error);
+                document.getElementById('latestNews').innerHTML = 
+                    '<div class="col-span-3 text-center py-8">' +
+                        '<i class="fas fa-exclamation-circle text-4xl text-red-400 mb-2"></i>' +
+                        '<p class="text-white text-opacity-80">Gagal memuat berita</p>' +
+                    '</div>';
+            });
+        
+        function escapeHtml(text) {
+            if (text == null) return '';
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return String(text).replace(/[&<>"']/g, m => map[m]);
+        }
+        
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('id-ID', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+    </script>
+    
     <jsp:include page="includes/footer.jsp" />
 </body>
 </html>

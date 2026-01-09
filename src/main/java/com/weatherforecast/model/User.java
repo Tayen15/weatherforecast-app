@@ -10,6 +10,7 @@ public class User {
      private String username;
      private String email;
      private String passwordHash;
+     private String role;
      private Timestamp createdAt;
 
      // Constructors
@@ -20,6 +21,14 @@ public class User {
           this.username = username;
           this.email = email;
           this.passwordHash = passwordHash;
+          this.role = "user"; // Default role
+     }
+
+     public User(String username, String email, String passwordHash, String role) {
+          this.username = username;
+          this.email = email;
+          this.passwordHash = passwordHash;
+          this.role = role;
      }
 
      // Getters and Setters
@@ -55,11 +64,23 @@ public class User {
           this.passwordHash = passwordHash;
      }
 
+     public String getRole() {
+          return role;
+     }
+
+     public void setRole(String role) {
+          this.role = role;
+     }
+
      public Timestamp getCreatedAt() {
           return createdAt;
      }
 
      public void setCreatedAt(Timestamp createdAt) {
           this.createdAt = createdAt;
+     }
+
+     public boolean isAdmin() {
+          return "admin".equalsIgnoreCase(this.role);
      }
 }
