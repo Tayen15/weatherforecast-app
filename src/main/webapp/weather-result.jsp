@@ -66,41 +66,7 @@
 </head>
 <body>
 
-    <!-- Navigation Bar -->
-    <nav class="navbar sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex items-center space-x-3">
-                    <img src="${pageContext.request.contextPath}/images/logo.png" alt="WeatherNow Logo" class="h-10 w-10 object-contain">
-                    <span class="text-xl font-bold text-gray-800">WeatherNow</span>
-                </div>
-                <div class="hidden md:flex items-center space-x-6">
-                    <a href="${pageContext.request.contextPath}/" class="text-gray-700 hover:text-gray-900 font-medium transition">
-                        <i class="fas fa-home mr-1"></i> Beranda
-                    </a>
-                    <a href="${pageContext.request.contextPath}/history" class="text-gray-700 hover:text-gray-900 font-medium transition">
-                        <i class="fas fa-history mr-1"></i> Riwayat
-                    </a>
-                    <a href="${pageContext.request.contextPath}/favorites" class="text-gray-700 hover:text-gray-900 font-medium transition">
-                        <i class="fas fa-heart mr-1"></i> Favorit
-                    </a>
-                    <% if (session.getAttribute("loggedInUser") != null) { %>
-                        <span class="text-gray-600 text-sm">Selamat datang, <strong><%= session.getAttribute("loggedInUser") %></strong></span>
-                        <a href="${pageContext.request.contextPath}/logout" class="text-gray-700 hover:text-gray-900 font-medium transition">
-                            <i class="fas fa-sign-out-alt mr-1"></i> Keluar
-                        </a>
-                    <% } else { %>
-                        <a href="${pageContext.request.contextPath}/login" class="text-gray-700 hover:text-gray-900 font-medium transition">
-                            <i class="fas fa-sign-in-alt mr-1"></i> Masuk
-                        </a>
-                        <a href="${pageContext.request.contextPath}/register" class="text-gray-700 hover:text-gray-900 font-medium transition">
-                            <i class="fas fa-user-plus mr-1"></i> Daftar
-                        </a>
-                    <% } %>
-                </div>
-            </div>
-        </div>
-    </nav>
+    <jsp:include page="includes/navbar.jsp" />
 
     <!-- Main Content -->
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -314,11 +280,6 @@
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="mt-16 py-8 bg-black bg-opacity-20">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <p class="text-white text-opacity-70 text-sm">© 2025 WeatherNow. Seluruh hak cipta dilindungi.</p>
-        </div>
-    </footer>
+    <jsp:include page="includes/footer.jsp" />
 </body>
 </html>
