@@ -1,4 +1,13 @@
+# ========================================
+# WeatherNow Configuration
+# ========================================
+# All settings can be overridden by environment variables
+# Environment variables take priority over values in this file
+
+# ----------------------------------------
 # PostgreSQL Database Configuration
+# ----------------------------------------
+# Environment Variables: DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD
 db.host=localhost
 db.port=5432
 db.name=weatherdb
@@ -6,12 +15,23 @@ db.username=your_database_username
 db.password=your_database_password
 db.url=jdbc:postgresql://${db.host}:${db.port}/${db.name}
 
+# ----------------------------------------
 # OpenWeatherMap API Configuration
+# ----------------------------------------
+# Environment Variables: WEATHER_API_KEY, WEATHER_API_URL
 # Get your free API key from: https://openweathermap.org/api
 weather.api.key=your_openweathermap_api_key_here
 weather.api.url=https://api.openweathermap.org/data/2.5/weather
 
-# INSTRUCTIONS:
-# 1. Copy this file and rename it to: config.properties
-# 2. Replace all placeholder values with your actual credentials
-# 3. NEVER commit the actual config.properties file to version control
+# ----------------------------------------
+# INSTRUCTIONS
+# ----------------------------------------
+# Option 1: Using config.properties file
+#   1. Copy this file and rename to: config.properties
+#   2. Replace all placeholder values with your actual credentials
+#   3. NEVER commit config.properties to version control
+#
+# Option 2: Using Environment Variables (recommended for production)
+#   Set the following environment variables:
+#   - DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD
+#   - WEATHER_API_KEY, WEATHER_API_URL (optional)
