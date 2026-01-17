@@ -5,10 +5,12 @@
 <%@ page import="java.text.SimpleDateFormat" %>
 <%
     List<Weather> recentSearches = (List<Weather>) request.getAttribute("recentSearches");
-    SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy HH:mm");
+    SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy, HH:mm");
+    int maxDisplay = 10; // Limit display to 10 items
+    int displayCount = 0;
 %>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,130 +19,94 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * {
-            font-family: 'Inter', sans-serif;
-        }
-        body {
-            background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
-            min-height: 100vh;
-        }
-        .navbar {
-            background: rgba(250, 250, 250, 0.98);
+        * { font-family: 'Inter', sans-serif; }
+        body { background-color: #0f172a; min-height: 100vh; }
+        .feature-card {
+            background: rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(10px);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        .history-card {
-            background: #fafafa;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             transition: all 0.3s ease;
         }
-        .history-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.08);
-        }
-        .gradient-text {
-            background: linear-gradient(135deg, #1a1a1a 0%, #404040 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(14, 165, 233, 0.3);
         }
     </style>
 </head>
-<body>
+<body class="flex flex-col min-h-screen">
 
     <jsp:include page="includes/navbar.jsp" />
 
-    <!-- Main Content -->
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Page Header -->
-        <div class="text-center mb-12">
-            <div class="inline-flex items-center bg-white bg-opacity-20 backdrop-blur-md px-8 py-4 rounded-full mb-4">
-                <i class="fas fa-history text-white text-3xl mr-3"></i>
-                <h1 class="text-4xl font-bold text-white">Riwayat Pencarian</h1>
+    <main class="flex-grow">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-8">
+                <div>
+                    <h1 class="text-2xl font-bold text-white mb-1">Riwayat Pencarian</h1>
+                </div>
             </div>
-            <p class="text-white text-xl text-opacity-90">Pencarian cuaca terbaru Anda</p>
-        </div>
 
-        <% if (recentSearches != null && !recentSearches.isEmpty()) { %>
-            <!-- History Grid -->
-            <div class="grid gap-6">
-                <% for (Weather weather : recentSearches) { %>
-                    <div class="history-card p-6">
-                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                            <!-- Location & Time Info -->
-                            <div class="flex items-center space-x-4">
-                                <div class="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <i class="fas fa-cloud-sun text-3xl text-gray-700"></i>
+            <% if (recentSearches != null && !recentSearches.isEmpty()) { %>
+                <!-- History List -->
+                <div class="space-y-3">
+                    <% for (Weather weather : recentSearches) { 
+                        if (displayCount >= maxDisplay) break;
+                        displayCount++;
+                    %>
+                        <div class="feature-card rounded-2xl p-5">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                
+                                <!-- Location Info -->
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 bg-sky-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-cloud-sun text-sky-400 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-white">
+                                            <%= weather.getCity() %>, <%= weather.getCountry() %>
+                                        </h3>
+                                        <p class="text-slate-400 text-sm capitalize"><%= weather.getDescription() %></p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3 class="text-2xl font-bold text-gray-800">
-                                        <i class="fas fa-map-marker-alt text-gray-700 mr-1"></i>
-                                        <%= weather.getCity() %>, <%= weather.getCountry() %>
-                                    </h3>
-                                    <p class="text-gray-600 capitalize mt-1">
-                                        <i class="fas fa-cloud mr-1"></i><%= weather.getDescription() %>
-                                    </p>
-                                    <p class="text-gray-500 text-sm mt-1">
-                                        <i class="fas fa-clock mr-1"></i>
+                                
+                                <!-- Weather Data & CTA -->
+                                <div class="flex items-center gap-4 sm:gap-6">
+                                    <div class="text-center">
+                                        <p class="text-2xl font-bold text-white"><%= String.format("%.0f", weather.getTemperature()) %><span class="text-slate-400 text-lg">°C</span></p>
+                                    </div>
+                                    <div class="hidden md:flex items-center gap-4 text-slate-400 text-sm">
+                                        <span><i class="fas fa-droplet mr-1 text-sky-400"></i><%= weather.getHumidity() %>%</span>
+                                        <span><i class="fas fa-wind mr-1 text-sky-400"></i><%= String.format("%.1f", weather.getWindSpeed()) %> m/s</span>
+                                    </div>
+                                    <div class="hidden sm:block text-slate-500 text-xs">
                                         <%= dateFormat.format(weather.getSearchedAt()) %>
-                                    </p>
-                                </div>
-                            </div>
-                            
-                            <!-- Weather Metrics -->
-                            <div class="flex items-center gap-6 md:gap-8">
-                                <div class="text-center">
-                                    <div class="text-4xl font-bold gradient-text">
-                                        <%= String.format("%.1f", weather.getTemperature()) %>°C
                                     </div>
-                                    <div class="text-gray-500 text-xs mt-1">Temperatur</div>
-                                </div>
-                                
-                                <div class="text-center">
-                                    <div class="text-2xl font-semibold text-gray-700">
-                                        <i class="fas fa-droplet mr-1"></i>
-                                        <%= weather.getHumidity() %>%
-                                    </div>
-                                    <div class="text-gray-500 text-xs mt-1">Kelembaban</div>
-                                </div>
-                                
-                                <div class="text-center">
-                                    <div class="text-2xl font-semibold text-gray-700">
-                                        <i class="fas fa-wind mr-1"></i>
-                                        <%= String.format("%.1f", weather.getWindSpeed()) %>
-                                    </div>
-                                    <div class="text-gray-500 text-xs mt-1">Angin (m/s)</div>
-                                </div>
-
-                                <div class="text-center">
-                                    <div class="text-2xl font-semibold text-gray-700">
-                                        <i class="fas fa-gauge-high mr-1"></i>
-                                        <%= weather.getPressure() %>
-                                    </div>
-                                    <div class="text-gray-500 text-xs mt-1">Tekanan (hPa)</div>
+                                    <a href="${pageContext.request.contextPath}/weather?city=<%= java.net.URLEncoder.encode(weather.getCity(), "UTF-8") %>" 
+                                       class="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white text-sm font-medium rounded-lg transition flex-shrink-0">
+                                        Lihat
+                                    </a>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                <% } %>
-            </div>
-        <% } else { %>
-            <!-- Empty State -->
-            <div class="bg-white rounded-2xl shadow-xl p-12 text-center">
-                <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <i class="fas fa-inbox text-5xl text-gray-700"></i>
+                    <% } %>
                 </div>
-                <h3 class="text-3xl font-bold text-gray-800 mb-3">Belum Ada Riwayat Pencarian</h3>
-                <p class="text-gray-600 mb-8 text-lg">Mulai cari cuaca untuk melihat riwayat Anda di sini</p>
-                <a href="${pageContext.request.contextPath}/" 
-                   class="inline-block px-8 py-4 bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-lg font-semibold text-lg hover:from-gray-900 hover:to-black transition transform hover:scale-105 shadow-lg">
-                    <i class="fas fa-search mr-2"></i>
-                    Cari Cuaca Sekarang
-                </a>
-            </div>
-        <% } %>
-    </div>
+            <% } else { %>
+                <!-- Empty State -->
+                <div class="feature-card rounded-2xl p-12 text-center">
+                    <div class="w-16 h-16 bg-slate-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-inbox text-2xl text-slate-500"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-white mb-2">Belum Ada Riwayat</h3>
+                    <p class="text-slate-400 text-sm mb-6">Mulai cari cuaca untuk melihat riwayat Anda</p>
+                    <a href="${pageContext.request.contextPath}/" 
+                       class="inline-flex items-center px-5 py-2.5 bg-sky-500 hover:bg-sky-600 text-white text-sm font-medium rounded-xl transition">
+                        Cari Cuaca
+                    </a>
+                </div>
+            <% } %>
+        </div>
+    </main>
 
     <jsp:include page="includes/footer.jsp" />
 </body>

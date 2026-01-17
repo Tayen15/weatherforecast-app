@@ -16,13 +16,28 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Servlet for admin news management
+ * Servlet for admin news management operations.
+ * Handles CRUD operations for news articles including:
+ * - List news with pagination and search
+ * - Create new articles
+ * - Update existing articles
+ * - Delete articles
+ * - Toggle publish status
+ * 
+ * Protected by AdminFilter - requires admin role.
+ * Returns JSON responses for AJAX operations.
+ * 
+ * @author WeatherNow Team
+ * @version 1.0
  */
 public class AdminNewsServlet extends HttpServlet {
      private NewsDAO newsDAO;
      private Gson gson;
      private static final int NEWS_PER_PAGE = 10;
 
+     /**
+      * Initialize DAO and Gson instances.
+      */
      @Override
      public void init() throws ServletException {
           newsDAO = new NewsDAO();

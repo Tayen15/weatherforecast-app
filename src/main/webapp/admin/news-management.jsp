@@ -7,12 +7,20 @@
     <title>Kelola Berita - WeatherNow</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tiny.cloud/1/z72nwuco4n4dl82wa73wr87z45kfsvdnlsiqaj14wwc004gc/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
     <style>
-        .navbar {
-            background: rgba(250, 250, 250, 0.98);
+        * { font-family: 'Inter', sans-serif; }
+        body { background: #0f172a; min-height: 100vh; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .bento-card {
+            background: rgba(30, 41, 59, 0.8);
             backdrop-filter: blur(10px);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         .modal {
             display: none;
@@ -23,7 +31,7 @@
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0,0,0,0.4);
+            background-color: rgba(0,0,0,0.6);
             animation: fadeIn 0.3s;
         }
         .modal.active {
@@ -34,8 +42,8 @@
         .modal-content {
             background-color: #fefefe;
             padding: 0;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             width: 90%;
             max-width: 800px;
             max-height: 90vh;
@@ -62,7 +70,7 @@
         }
         .toast {
             padding: 16px 20px;
-            border-radius: 10px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             gap: 12px;
@@ -76,19 +84,19 @@
             animation: toastSlideOut 0.3s ease-in forwards;
         }
         .toast-success {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: #10b981;
             color: white;
         }
         .toast-error {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            background: #ef4444;
             color: white;
         }
         .toast-warning {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            background: #f59e0b;
             color: white;
         }
         .toast-info {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            background: #0ea5e9;
             color: white;
         }
         .toast-icon {
@@ -117,7 +125,7 @@
             left: 0;
             height: 4px;
             background: rgba(255, 255, 255, 0.4);
-            border-radius: 0 0 10px 10px;
+            border-radius: 0 0 12px 12px;
             animation: progressShrink 4s linear forwards;
         }
         @keyframes toastSlideIn {
@@ -146,21 +154,26 @@
         }
     </style>
 </head>
-<body class="bg-gray-50">
+<body>
     <!-- Toast Container -->
     <div id="toastContainer" class="toast-container"></div>
     
     <jsp:include page="../includes/navbar.jsp" />
     
-    <div class="container mx-auto px-4 py-8">
-        <div class="bg-white rounded-lg shadow-lg p-6">
+    <main class="container mx-auto px-4 py-8">
+        <div class="glass-card rounded-2xl shadow-xl p-8">
             <!-- Header -->
-            <div class="flex justify-between items-center mb-6">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-800">Kelola Berita</h1>
-                    <p class="text-gray-600 mt-1">Tambah, edit, dan kelola konten berita</p>
+                    <h1 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <div class="w-12 h-12 bg-sky-100 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-newspaper text-sky-500 text-xl"></i>
+                        </div>
+                        Kelola Berita
+                    </h1>
+                    <p class="text-gray-500 mt-2 ml-16">Tambah, edit, dan kelola konten berita</p>
                 </div>
-                <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition">
+                <button onclick="openModal()" class="bg-sky-600 hover:bg-sky-700 text-white px-6 py-3 rounded-xl font-semibold transition shadow-lg shadow-sky-600/30">
                     <i class="fas fa-plus mr-2"></i>Tambah Berita
                 </button>
             </div>
@@ -169,25 +182,25 @@
             <div class="mb-6">
                 <div class="relative">
                     <input type="text" id="searchInput" placeholder="Cari berita berdasarkan judul atau konten..." 
-                           class="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                           class="w-full px-5 py-3.5 pl-12 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent bg-gray-50">
                     <i class="fas fa-search absolute left-4 top-4 text-gray-400"></i>
                 </div>
             </div>
             
             <!-- News Table -->
-            <div class="overflow-x-auto">
-                <table class="min-w-full bg-white">
-                    <thead class="bg-gray-100">
+            <div class="overflow-x-auto rounded-xl border border-gray-200">
+                <table class="min-w-full">
+                    <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">ID</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Judul</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Penulis</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Tanggal</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Aksi</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">ID</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Judul</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Penulis</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Tanggal</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody id="newsTableBody" class="bg-white divide-y divide-gray-200">
+                    <tbody id="newsTableBody" class="bg-white divide-y divide-gray-100">
                         <!-- Will be populated by JavaScript -->
                     </tbody>
                 </table>
@@ -198,63 +211,63 @@
                 <!-- Will be populated by JavaScript -->
             </div>
         </div>
-    </div>
+    </main>
     
     <!-- Modal Dialog for Create/Edit -->
     <div id="newsModal" class="modal">
         <div class="modal-content">
-            <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4 rounded-t-lg flex justify-between items-center">
+            <div class="bg-sky-600 text-white px-6 py-5 rounded-t-2xl flex justify-between items-center">
                 <h2 id="modalTitle" class="text-xl font-bold">Tambah Berita</h2>
-                <button onclick="closeModal()" class="text-white hover:text-gray-200">
-                    <i class="fas fa-times text-2xl"></i>
+                <button onclick="closeModal()" class="text-white hover:text-gray-200 w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 transition">
+                    <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
             <form id="newsForm" class="p-6">
                 <input type="hidden" id="newsId" name="id">
                 
-                <div class="mb-4">
+                <div class="mb-5">
                     <label for="title" class="block text-gray-700 font-semibold mb-2">Judul Berita*</label>
                     <input type="text" id="title" name="title" required
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
                            placeholder="Masukkan judul berita">
                 </div>
                 
-                <div class="mb-4">
+                <div class="mb-5">
                     <label for="author" class="block text-gray-700 font-semibold mb-2">Penulis*</label>
                     <input type="text" id="author" name="author" required
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
                            placeholder="Masukkan nama penulis">
                 </div>
                 
-                <div class="mb-4">
+                <div class="mb-5">
                     <label for="imageUrl" class="block text-gray-700 font-semibold mb-2">URL Gambar</label>
                     <input type="url" id="imageUrl" name="imageUrl"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
                            placeholder="https://example.com/image.jpg (opsional)">
-                    <p class="text-sm text-gray-500 mt-1">Kosongkan untuk menggunakan gambar placeholder</p>
+                    <p class="text-sm text-gray-400 mt-2">Kosongkan untuk menggunakan gambar placeholder</p>
                 </div>
                 
-                <div class="mb-4">
+                <div class="mb-5">
                     <label for="content" class="block text-gray-700 font-semibold mb-2">Konten Berita*</label>
                     <textarea id="content" name="content" rows="10" required
-                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent">
                     </textarea>
                 </div>
                 
                 <div class="mb-6">
-                    <label class="flex items-center">
-                        <input type="checkbox" id="isPublished" name="isPublished" class="mr-2 h-5 w-5 text-blue-600">
-                        <span class="text-gray-700 font-semibold">Publikasikan berita ini</span>
+                    <label class="flex items-center cursor-pointer">
+                        <input type="checkbox" id="isPublished" name="isPublished" class="mr-3 h-5 w-5 text-sky-600 rounded focus:ring-sky-500">
+                        <span class="text-gray-700 font-medium">Publikasikan berita ini</span>
                     </label>
                 </div>
                 
                 <div class="flex justify-end space-x-3">
                     <button type="button" onclick="closeModal()" 
-                            class="px-6 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition">
+                            class="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition">
                         Batal
                     </button>
                     <button type="submit" 
-                            class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition">
+                            class="px-6 py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-xl font-medium transition shadow-lg shadow-sky-600/30">
                         <i class="fas fa-save mr-2"></i>Simpan
                     </button>
                 </div>
@@ -264,19 +277,21 @@
     
     <!-- Delete Confirmation Modal -->
     <div id="deleteModal" class="modal">
-        <div class="modal-content" style="max-width: 400px;">
-            <div class="bg-red-600 text-white px-6 py-4 rounded-t-lg">
-                <h2 class="text-xl font-bold"><i class="fas fa-exclamation-triangle mr-2"></i>Konfirmasi Hapus</h2>
+        <div class="modal-content" style="max-width: 420px;">
+            <div class="bg-red-500 text-white px-6 py-5 rounded-t-2xl">
+                <h2 class="text-xl font-bold flex items-center">
+                    <i class="fas fa-exclamation-triangle mr-3"></i>Konfirmasi Hapus
+                </h2>
             </div>
             <div class="p-6">
-                <p class="text-gray-700 mb-6">Apakah Anda yakin ingin menghapus berita ini? Tindakan ini tidak dapat dibatalkan.</p>
+                <p class="text-gray-600 mb-6">Apakah Anda yakin ingin menghapus berita ini? Tindakan ini tidak dapat dibatalkan.</p>
                 <div class="flex justify-end space-x-3">
                     <button onclick="closeDeleteModal()" 
-                            class="px-6 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition">
+                            class="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition">
                         Batal
                     </button>
                     <button onclick="confirmDelete()" 
-                            class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition">
+                            class="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium transition">
                         <i class="fas fa-trash mr-2"></i>Hapus
                     </button>
                 </div>
@@ -287,13 +302,26 @@
     <jsp:include page="../includes/footer.jsp" />
     
     <script>
-        let currentPage = 1;
-        let currentSearch = '';
-        let deleteNewsId = null;
-        let editor = null;
+        // ========================================
+        // GLOBAL VARIABLES
+        // ========================================
+        let currentPage = 1;           // Current pagination page
+        let currentSearch = '';        // Current search query
+        let deleteNewsId = null;       // ID of news to be deleted
+        let editor = null;             // TinyMCE editor instance
         
-        // Initialize TinyMCE
+        // ========================================
+        // INITIALIZATION
+        // ========================================
+        
+        /**
+         * Initialize application when DOM is ready
+         * - Sets up TinyMCE rich text editor
+         * - Loads initial news list
+         * - Configures search functionality with debounce
+         */
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize TinyMCE rich text editor
             tinymce.init({
                 selector: '#content',
                 height: 400,
@@ -307,55 +335,43 @@
                 content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
             });
             
+            // Load initial news list
             loadNews();
             
-            // Search functionality with debounce
+            // Setup search functionality with debounce (500ms delay)
             let searchTimeout;
             document.getElementById('searchInput').addEventListener('input', function(e) {
                 clearTimeout(searchTimeout);
                 searchTimeout = setTimeout(() => {
                     currentSearch = e.target.value;
-                    currentPage = 1;
+                    currentPage = 1; // Reset to first page on new search
                     loadNews();
                 }, 500);
             });
         });
         
-        // Load news list
+        // ========================================
+        // API CONFIGURATION
+        // ========================================
+        
+        // Get application context path for building URLs
         const contextPath = '<%= request.getContextPath() %>';
         
-        // Helper function for API calls
-        async function apiCall(url, options = {}) {
-            try {
-                const response = await fetch(url, {
-                    ...options,
-                    credentials: 'same-origin'
-                });
-                
-                // Check if response is JSON
-                const contentType = response.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    // Server returned HTML (probably redirect to login)
-                    if (response.url.includes('login')) {
-                        window.location.href = contextPath + '/login.jsp?error=session_expired';
-                        return null;
-                    }
-                    throw new Error('Session expired atau server error. Silakan login ulang.');
-                }
-                
-                return await response.json();
-            } catch (error) {
-                console.error('API Error:', error);
-                throw error;
-            }
-        }
+        // ========================================
+        // NEWS DATA OPERATIONS
+        // ========================================
         
+        /**
+         * Loads news list from server with pagination and search
+         * Displays results in table and updates pagination controls
+         */
         function loadNews() {
             const url = contextPath + '/admin/news?action=list&page=' + currentPage + 
                         (currentSearch ? '&search=' + encodeURIComponent(currentSearch) : '');
             
             fetch(url, { credentials: 'same-origin' })
                 .then(response => {
+                    // Validate response is JSON (not HTML redirect)
                     if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) {
                         throw new Error('Session expired');
                     }
@@ -379,7 +395,10 @@
                 });
         }
         
-        // Display news in table
+        /**
+         * Displays news list in the table
+         * @param {Array} newsList - Array of news objects
+         */
         function displayNews(newsList) {
             const tbody = document.getElementById('newsTableBody');
             tbody.innerHTML = '';

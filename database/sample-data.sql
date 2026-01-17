@@ -1,17 +1,42 @@
--- Sample Data for Testing News Management Feature
--- Run this after running database/schema.sql
+-- =========================================
+-- Weather Forecast Application - Sample Data
+-- =========================================
+-- Purpose: Provide initial data for testing and development
+-- - Admin user for accessing admin panel
+-- - Regular user for testing normal functionality  
+-- - Sample news articles for news system
+-- Author: WeatherNow Team
+-- Version: 1.0
+-- =========================================
 
--- 1. Insert sample admin user (password: 123456)
--- Password hash generated with BCrypt
+-- IMPORTANT: Run this AFTER schema.sql has been executed
+-- This script is safe to run multiple times (uses ON CONFLICT)
+
+-- =========================================
+-- 1. INSERT SAMPLE USERS
+-- =========================================
+-- Password for both users: "123456"
+-- Hashed using BCrypt with salt rounds = 10
+
 INSERT INTO users (username, email, password_hash, role) 
 VALUES 
+    -- Admin user - full access to admin panel
     ('admin', 'admin@weathernow.com', '$2a$10$Y7oJ023YOMYJ9zQAXAF85e4WoAJxiYXZp8tk0H70iG8idvTjyqRt2', 'admin'),
+    
+    -- Regular user - normal user access
     ('user1', 'user1@example.com', '$2a$10$Y7oJ023YOMYJ9zQAXAF85e4WoAJxiYXZp8tk0H70iG8idvTjyqRt2', 'user')
+    
+-- Skip if username already exists
 ON CONFLICT (username) DO NOTHING;
 
--- 2. Insert sample news articles
+-- =========================================
+-- 2. INSERT SAMPLE NEWS ARTICLES
+-- =========================================
+-- Contains various weather-related news for testing news system
+
 INSERT INTO news (title, content, author, image_url, is_published, created_at) 
 VALUES
+    -- News Article 1: El Niño Phenomenon
     (
         'Fenomena El Niño Diprediksi Berlanjut Hingga Akhir Tahun',
         '<h2>Dampak El Niño terhadap Cuaca Indonesia</h2>
@@ -32,9 +57,11 @@ VALUES
         <p>Pemerintah dan BMKG telah menyiapkan berbagai langkah antisipasi, termasuk early warning system untuk daerah rawan kekeringan dan kebakaran. Masyarakat diimbau untuk menghemat air dan waspada terhadap potensi bencana.</p>',
         'Dr. Dwikorita Karnawati',
         'https://images.unsplash.com/photo-1592210454359-9043f067919b?w=800',
-        true,
-        NOW() - INTERVAL '2 days'
+        true,  -- Published
+        NOW() - INTERVAL '2 days'  -- 2 days ago
     ),
+    
+    -- News Article 2: Extreme Weather Warning System
     (
         'Hujan Ekstrem di Jakarta: Sistem Peringatan Dini BMKG',
         '<h2>BMKG Meluncurkan Sistem Peringatan Cuaca Ekstrem</h2>

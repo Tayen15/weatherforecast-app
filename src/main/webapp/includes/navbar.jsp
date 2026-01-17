@@ -3,63 +3,126 @@
 <%
     String currentPage = request.getRequestURI();
     String contextPath = request.getContextPath();
+    Object user = session.getAttribute("user");
+    Object loggedInUser = session.getAttribute("loggedInUser");
+    String userRole = (String) session.getAttribute("userRole");
+    boolean isLoggedIn = (user != null || loggedInUser != null);
+    boolean isAdmin = "admin".equals(userRole);
+    String username = "";
+    if (isLoggedIn) {
+        username = (loggedInUser != null) ? loggedInUser.toString() : user.toString();
+    }
 %>
 <!-- Navigation Bar -->
-<nav class="navbar sticky top-0 z-50">
+<nav class="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-md border-b border-slate-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-            <div class="flex items-center space-x-3">
-                <i class="fas fa-cloud-sun text-3xl text-gray-800"></i>
-                <span class="text-xl font-bold text-gray-800">WeatherNow</span>
-            </div>
-            <div class="hidden md:flex items-center space-x-6">
+        <div class="flex justify-between items-center h-14">
+            
+            <!-- Logo -->
+            <a href="${pageContext.request.contextPath}/" class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-sky-500 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-cloud-sun text-white text-sm"></i>
+                </div>
+                <span class="text-white font-semibold">WeatherNow</span>
+            </a>
+            
+            <!-- Desktop Navigation -->
+            <div class="hidden md:flex items-center gap-1">
                 <a href="${pageContext.request.contextPath}/" 
-                   class="<%= currentPage.contains("/index.jsp") || currentPage.endsWith("/weatherforecast/") || currentPage.endsWith("/weatherforecast") ? "text-gray-900 font-semibold border-b-2 border-gray-800" : "text-gray-700 hover:text-gray-900 font-medium" %> transition">
-                    <i class="fas fa-home mr-1"></i> Beranda
+                   class="<%= currentPage.contains("/index.jsp") || currentPage.endsWith("/weatherforecast/") || currentPage.endsWith("/weatherforecast") ? "text-white bg-white/10" : "text-slate-400 hover:text-white" %> px-3 py-1.5 rounded-lg text-sm font-medium transition">
+                    Beranda
                 </a>
                 <a href="${pageContext.request.contextPath}/history" 
-                   class="<%= currentPage.contains("/history") ? "text-gray-900 font-semibold border-b-2 border-gray-800" : "text-gray-700 hover:text-gray-900 font-medium" %> transition">
-                    <i class="fas fa-history mr-1"></i> Riwayat
-                </a>
-                <a href="${pageContext.request.contextPath}/about.jsp" 
-                   class="<%= currentPage.contains("/about.jsp") ? "text-gray-900 font-semibold border-b-2 border-gray-800" : "text-gray-700 hover:text-gray-900 font-medium" %> transition">
-                    <i class="fas fa-info-circle mr-1"></i> Tentang
+                   class="<%= currentPage.contains("/history") ? "text-white bg-white/10" : "text-slate-400 hover:text-white" %> px-3 py-1.5 rounded-lg text-sm font-medium transition">
+                    Riwayat
                 </a>
                 <a href="${pageContext.request.contextPath}/news" 
-                   class="<%= currentPage.contains("/news") ? "text-gray-900 font-semibold border-b-2 border-gray-800" : "text-gray-700 hover:text-gray-900 font-medium" %> transition">
-                    <i class="fas fa-newspaper mr-1"></i> Berita
+                   class="<%= currentPage.contains("/news") && !currentPage.contains("/admin") ? "text-white bg-white/10" : "text-slate-400 hover:text-white" %> px-3 py-1.5 rounded-lg text-sm font-medium transition">
+                    Berita
                 </a>
-                <% 
-                    Object user = session.getAttribute("user");
-                    Object loggedInUser = session.getAttribute("loggedInUser");
-                    String userRole = (String) session.getAttribute("userRole");
-                    boolean isLoggedIn = (user != null || loggedInUser != null);
-                    boolean isAdmin = "admin".equals(userRole);
-                    
-                    if (isLoggedIn) { 
-                        String username = (loggedInUser != null) ? loggedInUser.toString() : user.toString();
-                %>
+                <% if (isLoggedIn) { %>
                     <a href="${pageContext.request.contextPath}/favorites" 
-                       class="<%= currentPage.contains("/favorites") ? "text-gray-900 font-semibold border-b-2 border-gray-800" : "text-gray-700 hover:text-gray-900 font-medium" %> transition">
-                        <i class="fas fa-heart mr-1"></i> Favorit
+                       class="<%= currentPage.contains("/favorites") ? "text-white bg-white/10" : "text-slate-400 hover:text-white" %> px-3 py-1.5 rounded-lg text-sm font-medium transition">
+                        Favorit
                     </a>
                     <% if (isAdmin) { %>
                         <a href="${pageContext.request.contextPath}/admin/news" 
-                           class="<%= currentPage.contains("/admin/") ? "text-gray-900 font-semibold border-b-2 border-gray-800" : "text-gray-700 hover:text-gray-900 font-medium" %> transition">
-                            <i class="fas fa-user-shield mr-1"></i> Admin
+                           class="<%= currentPage.contains("/admin/") ? "text-white bg-white/10" : "text-slate-400 hover:text-white" %> px-3 py-1.5 rounded-lg text-sm font-medium transition">
+                            Admin
                         </a>
                     <% } %>
-                    <span class="text-gray-600 text-sm">Selamat datang, <strong><%= username %></strong></span>
-                    <a href="${pageContext.request.contextPath}/logout" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition">
-                        <i class="fas fa-sign-out-alt mr-1"></i> Keluar
+                <% } %>
+            </div>
+            
+            <!-- User Section -->
+            <div class="hidden md:flex items-center gap-3">
+                <% if (isLoggedIn) { %>
+                    <span class="text-slate-400 text-sm"><%= username %></span>
+                    <a href="${pageContext.request.contextPath}/logout" 
+                       class="text-slate-400 hover:text-white text-sm font-medium transition">
+                        Keluar
                     </a>
                 <% } else { %>
                     <a href="${pageContext.request.contextPath}/login.jsp" 
-                       class="<%= currentPage.contains("/login.jsp") || currentPage.contains("/register.jsp") ? "bg-gray-900" : "bg-gray-800 hover:bg-gray-900" %> text-white px-4 py-2 rounded-lg transition">
-                        <i class="fas fa-sign-in-alt mr-1"></i> Masuk
+                       class="bg-sky-500 hover:bg-sky-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium transition">
+                        Masuk
+                    </a>
+                <% } %>
+            </div>
+            
+            <!-- Mobile Menu Button -->
+            <button id="mobileMenuBtn" class="md:hidden p-2 text-slate-400 hover:text-white transition">
+                <i class="fas fa-bars text-lg"></i>
+            </button>
+        </div>
+        
+        <!-- Mobile Navigation -->
+        <div id="mobileMenu" class="hidden md:hidden pb-4">
+            <div class="flex flex-col gap-1 pt-2 border-t border-slate-800">
+                <a href="${pageContext.request.contextPath}/" 
+                   class="<%= currentPage.contains("/index.jsp") || currentPage.endsWith("/weatherforecast/") || currentPage.endsWith("/weatherforecast") ? "text-white bg-white/10" : "text-slate-400" %> px-3 py-2 rounded-lg text-sm font-medium">
+                    Beranda
+                </a>
+                <a href="${pageContext.request.contextPath}/history" 
+                   class="<%= currentPage.contains("/history") ? "text-white bg-white/10" : "text-slate-400" %> px-3 py-2 rounded-lg text-sm font-medium">
+                    Riwayat
+                </a>
+                <a href="${pageContext.request.contextPath}/news" 
+                   class="<%= currentPage.contains("/news") && !currentPage.contains("/admin") ? "text-white bg-white/10" : "text-slate-400" %> px-3 py-2 rounded-lg text-sm font-medium">
+                    Berita
+                </a>
+                <% if (isLoggedIn) { %>
+                    <a href="${pageContext.request.contextPath}/favorites" 
+                       class="<%= currentPage.contains("/favorites") ? "text-white bg-white/10" : "text-slate-400" %> px-3 py-2 rounded-lg text-sm font-medium">
+                        Favorit
+                    </a>
+                    <% if (isAdmin) { %>
+                        <a href="${pageContext.request.contextPath}/admin/news" 
+                           class="<%= currentPage.contains("/admin/") ? "text-white bg-white/10" : "text-slate-400" %> px-3 py-2 rounded-lg text-sm font-medium">
+                            Admin
+                        </a>
+                    <% } %>
+                    <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-800 px-3">
+                        <span class="text-slate-400 text-sm"><%= username %></span>
+                        <a href="${pageContext.request.contextPath}/logout" class="text-red-400 text-sm font-medium">Keluar</a>
+                    </div>
+                <% } else { %>
+                    <a href="${pageContext.request.contextPath}/login.jsp" 
+                       class="mt-2 bg-sky-500 text-white px-3 py-2 rounded-lg text-sm font-medium text-center">
+                        Masuk
                     </a>
                 <% } %>
             </div>
         </div>
     </div>
 </nav>
+
+<script>
+    document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+        const menu = document.getElementById('mobileMenu');
+        menu.classList.toggle('hidden');
+        const icon = this.querySelector('i');
+        icon.classList.toggle('fa-bars');
+        icon.classList.toggle('fa-times');
+    });
+</script>
